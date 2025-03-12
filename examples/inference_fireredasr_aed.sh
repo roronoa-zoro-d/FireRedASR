@@ -11,6 +11,7 @@ wavs="--wav_path wav/BAC009S0764W0121.wav"
 wavs="--wav_paths wav/BAC009S0764W0121.wav wav/IT0011W0001.wav wav/TEST_NET_Y0000000000_-KTKHdZ2fb8_S00000.wav wav/TEST_MEETING_T0000000001_S00000.wav"
 wavs="--wav_dir wav/"
 wavs="--wav_scp wav/wav.scp"
+wavs="--wav_scp /home/zhangjiayuan/program/yto/yto-asr-core/asr-engine/runtime/datas/cockpit/0814zonghe/wav.scp"
 
 out="out/aed-l-asr.txt"
 
@@ -29,5 +30,6 @@ speech2text.py --asr_type "aed" --model_dir $model_dir $decode_args $wavs --outp
 
 
 ref="wav/text"
+ref="/home/zhangjiayuan/program/yto/yto-asr-core/asr-engine/runtime/datas/cockpit/0814zonghe/text"
 wer.py --print_sentence_wer 1 --do_tn 0 --rm_special 0 --ref $ref --hyp $out > $out.wer 2>&1
 tail -n8 $out.wer
