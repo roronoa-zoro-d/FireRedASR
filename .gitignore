@@ -4,3 +4,6 @@ FireRedTeam/*
 */*/*/__pycache__/
 
 examples/out/*
+
+
+server/__pycache__/*
