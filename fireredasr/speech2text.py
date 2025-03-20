@@ -5,6 +5,7 @@ import glob
 import os
 import sys
 
+import torch
 from fireredasr.models.fireredasr import FireRedAsr
 
 
@@ -39,8 +40,13 @@ parser.add_argument("--temperature", type=float, default=1.0)
 def main(args):
     wavs = get_wav_info(args)
     fout = open(args.output, "w") if args.output else None
+    
+    gpu_id = torch.cuda.current_device()
+    device = 'cpu'
+    if torch.cuda.is_available():
+        device = f'cuda:{gpu_id}'
 
-    model = FireRedAsr.from_pretrained(args.asr_type, args.model_dir)
+    model = FireRedAsr.from_pretrained(args.asr_type, args.model_dir, device=device)
 
     batch_uttid = []
     batch_wav_path = []
