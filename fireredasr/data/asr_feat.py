@@ -17,7 +17,10 @@ class ASRFeatExtractor:
         feats = []
         durs = []
         for wav_path in wav_paths:
-            sample_rate, wav_np = kaldiio.load_mat(wav_path)
+            if type(wav_path) is str:
+                sample_rate, wav_np = kaldiio.load_mat(wav_path)
+            else:
+                wav_np, sample_rate = wav_path
             dur = wav_np.shape[0] / sample_rate
             fbank = self.fbank((sample_rate, wav_np))
             if self.cmvn is not None:
