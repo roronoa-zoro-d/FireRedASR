@@ -12,7 +12,7 @@ from fireredasr.tokenizer.llm_tokenizer import LlmTokenizerWrapper
 
 class FireRedAsr:
     @classmethod
-    def from_pretrained(cls, asr_type, model_dir):
+    def from_pretrained(cls, asr_type, model_dir, device='cpu'):
         assert asr_type in ["aed", "llm"]
 
         cmvn_path = os.path.join(model_dir, "cmvn.ark")
@@ -31,23 +31,23 @@ class FireRedAsr:
             model, tokenizer = load_firered_llm_model_and_tokenizer(
                 model_path, encoder_path, llm_dir)
         model.eval()
-        return cls(asr_type, feat_extractor, model, tokenizer)
+        return cls(asr_type, feat_extractor, model, tokenizer, device=device)
 
-    def __init__(self, asr_type, feat_extractor, model, tokenizer):
+    def __init__(self, asr_type, feat_extractor, model, tokenizer, device='cpu'):
         self.asr_type = asr_type
         self.feat_extractor = feat_extractor
         self.model = model
         self.tokenizer = tokenizer
+        self.model.to(device=device)
+        self.device = device
 
     @torch.no_grad()
     def transcribe(self, batch_uttid, batch_wav_path, args={}):
         feats, lengths, durs = self.feat_extractor(batch_wav_path)
         total_dur = sum(durs)
         if args.get("use_gpu", False):
-            feats, lengths = feats.cuda(), lengths.cuda()
-            self.model.cuda()
-        else:
-            self.model.cpu()
+            feats, lengths = feats.to(self.device), lengths.to(self.device)
+            
 
         if self.asr_type == "aed":
             start_time = time.time()
@@ -70,7 +70,7 @@ class FireRedAsr:
                 hyp = hyp[0]  # only return 1-best
                 hyp_ids = [int(id) for id in hyp["yseq"].cpu()]
                 text = self.tokenizer.detokenize(hyp_ids)
-                results.append({"uttid": uttid, "text": text, "wav": wav,
+                results.append({"uttid": uttid, "text": text, 
                     "rtf": f"{rtf:.4f}"})
             return results
 
